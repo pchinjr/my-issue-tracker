@@ -3,10 +3,20 @@ let data = require('@begin/data')
 
 exports.handler = async function http(req) {
 
-  //get the number of issues
-  const result = await data.get({
+  let date = new Date().toLocaleDateString()
+  let url = 'https://api.github.com/repositories/137939671/issues'
+  let issues = await tiny.get({ url })
+  let numberOfIssues = issues.body.length
+  console.log(numberOfIssues)
+  //save the number of issues per day
+  await data.set({
     table: 'issues',
+    number: numberOfIssues,
+    date: date
   })
+
+
+  //lookup number of issues and compare to previous days
 
   let html = `
 <!doctype html>
@@ -18,17 +28,12 @@ exports.handler = async function http(req) {
     <link href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" rel="icon" type="image/x-icon">
   </head>
   <body>
-
     <h1 class="center-text">
       Praise Cage
     </h1>
-
-    <p>
-      <ul>${(result.map(issue => `<li>${issue.date} ${issue.number} ${issue.key}</li>`).join(' '))}</ul>
-
+    <p class="center-text">
+      There are ${JSON.stringify(numberOfIssues)} open issues
     </p>
-    <a href='/testIssues'> Add a test Issue </a>
-
   </body>
 </html>`
 
